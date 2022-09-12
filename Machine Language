@@ -1,0 +1,57 @@
+Control.Print.printDepth := 100;
+Control.Print.printLength := 100;
+
+(*Q1*)
+fun insert x [] = [x]
+    | insert x (a::b) = if x < a then x::a::b else a::(insert x b)
+
+(*Q2*)
+fun sort [] = []
+    | sort (a::b) = insert a (sort b)
+
+(*Q3*)
+infix <;
+fun polySort (op <) [] = []
+    | polySort (op <) (a::b) =
+        let
+            fun polyInsert x []= [x]
+            | polyInsert x (c::d) = if x < c then x::c::d else c::(polyInsert x d)
+        in
+            polyInsert a (polySort (op <) b)
+        end
+
+(*Q4*)
+infix foo
+fun fold (op foo) [] b = b
+    | fold (op foo) (L::K) b = L foo (fold (op foo) K b)
+
+(*Q5*)
+datatype 'a tree = leaf of 'a | node of 'a tree list
+
+(*Q6*)
+fun fringe (leaf x) = [x]
+    |  fringe (node (v)) = fold (op @) (map fringe v) []
+
+(*Q7*)
+infix foo1;
+fun mapTree f (leaf x) = leaf (map f ) x 
+    | mapTree f (node (x::a)) = node ((mapTree f x) @ (mapTree f a))
+
+fun mapTree (op fn1) (leaf x) = leaf (fn1 x) |
+    mapTree (op fn1) (node y) = node (map (fn st => (mapTree (op fn1) st)) y)
+
+(*Q8*)
+fun sortTree (op f) (leaf x) = leaf (polySort (op f) x) |
+    sortTree (op f) (node y) = node (map (fn st => sortTree (op f) st) y)
+
+(*Q9*)
+infix foo1
+fun mergeList (op foo1) [] b= b
+    | mergeList (op foo1) a [] = a
+    | mergeList (op foo1) (x::a) (y::b) =
+        if x foo1 y then x::(mergeList (op foo1) a (y::b)) else y::(mergeList (op foo1) (x::a) b)
+        
+(*Q10*)
+fun mergeTree (op <) (leaf x) = polySort (op <) x |
+    mergeTree (op <) (node y) =
+        polySort (op <) (fold (op @) (map (fn st => mergeTree (op <) st) y) [])

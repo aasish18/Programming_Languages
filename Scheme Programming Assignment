@@ -1,0 +1,153 @@
+ ;; Scheme Programming Assignment
+;; Name : Asish Addepalli
+;; Net Id : aa9335
+
+;;1st question
+
+;;(byTwos n m) returns the list of every other integer starting with n up to m
+;; Base Case  : If n > m, the result is the empty list
+;; Hypothesis: Assume (byTwos (+ n 2) m) returns the list of every other integer from n+2 to m
+;; Recursive Step : (byTwos n m) returns (cons n (byTwos (+ n 2) m))
+
+(define (byTwos N M)
+    (cond ((> N M) '())
+          (else (cons N (byTwos (+ N 2) M)))))
+
+;;2nd question
+
+;;(compress L) returns the list of all the atoms contained in L or in any nested list within L
+;; Base Case : If List is empty return an empty list.
+;; Hypothesis : (compress (cdr L)) returns a list which contains all the atoms contained in L or in any nested list with L except the first atom of L
+
+
+(define (compress lst)
+  (cond ((null? lst) '())
+        ((list? (car lst))
+         (append (compress (car lst))
+                 (compress (cdr lst))))
+        (else (cons (car lst) (compress (cdr lst))))))
+
+;;3rd question
+
+;; (rev-all L) reverses all the elements in a list L and if the L contains nested lists, elements in nested lists are also reversed.
+;; Base Case : rev-all calls an other function function reverse-all which takes to inputs old list and new list. if the old list is null, return the new list.
+;; Hypothesis : (rev (cdr L) (cons (car L) result)) reverses the remaining elements and adds it to the result list where car L is already present and when car L is not a list. and (rev (cdr L) (cons (rev (car L) '()) result)) reverse the remaining elements and add it to the result list where car L which is a list is already present in reverse state.
+;; Recursive step : (rev-all L) returns (rev (cdr L) (cons (car L) result)) is car L is not list and (rev-all L) returns (rev (cdr L) (cons (rev (car L) '()) result)) is car L is a list.
+
+(define (rev old new)
+    (cond ((null? old) new)
+          ((list? (car old)) (rev (cdr old) (cons (rev (car old) '()) new)))
+          (else (rev (cdr old) (cons (car old) new)))))
+(define (rev-all L)
+    (rev L '()))
+
+;;4th question
+
+;; (equalTo x y) return #t if the list x is equal to list y and returns #f if lists are not equal
+;; Base Case : If list x is null, check if list y is null, If both are null return true else return false.
+;; Hypothesis : (equalTo (cdr list1) (cdr list2)) returns #t if all the elements in the list x except the first element are equal to all the elements in list y except the first element.
+;; Recursive Step : (equalTo x y) returns (eq? (car x) (car y)) (equalTo (cdr x) (cdr y))
+
+(define (equalTo x y)
+    (cond
+      ((null? x) (null? y))
+      ((null? y) '())
+      ((eq? (car x) (car y))
+      (equalTo (cdr x) (cdr y)))
+    (else '())))
+
+;;5th question
+
+;; (equalFns fn1 fn2 domain) returns #t if fn1 and fn2 are equivalent for the given domain and #f if fn1 and fn2 are not equivalent.
+;; Base Case : Call map for fn1 to domain and call map for fn2 to domain and call equal on their result.
+;; Hypothesis : (equal? (map fn1 domain) (map fn2 domain)) returns true if fn1 on domain and fn2 on domain gives equal results.
+;; Recursive Step :
+
+(define (equalFns fn1 fn2 domain)
+    (cond ((equal? (map fn1 domain) (map fn2 domain)) #t)
+    (else #f)))
+
+;;6th question
+
+;; (same-vals fn1 fn2 domain) returns #t if fn1 and fn2 are equivalent for the given domain and #f if fn1 and fn2 are not equivalent.
+;; Base Case : if domain is null return empty list.
+;; Hypothesis : (same-vals fn1 fn2 (cdr domain)) returns list of integers in domain(except first element) which gives the same output for fn2 and fn1.
+;; Recursive Step : (same-vals fn1 fn2 domain) gives (cons (car domain) (same-vals fn1 fn2 (cdr domain))) when first element in domain gives same output for fn1 and fn2. (same-vals fn1 fn2 domain) gives (same-vals fn1 fn2 (cdr domain))) when fn1 and fn2 gives different output for first element in domain.
+
+(define (same-vals fn1 fn2 domain)
+    (cond ((null? domain) '())
+          ((eq? (fn1 (car domain)) (fn2 (car domain))) (cons (car domain) (same-vals fn1 fn2 (cdr domain))) )
+          (else (same-vals fn1 fn2 (cdr domain)))))
+
+;;7th question
+
+;;  (split x L) returns two lists with respect to x.
+;; Base case : if L is null return result list
+;; Hypothesis : (helper (cdr L) x (cons (append (car result) (cons (car L) '())) (cdr result)))  and (helper (cdr L) x (cons (car result) (list (cons (car L) (cadr result))) ))gives the result which contains elements with less than or equal in one list and greater than in one list
+;; Recursive step : (split x L) calls (helper (cdr L) x (cons (append (car result) (cons (car L) '())) (cdr result))) when car L is less than x and calls (helper (cdr L) x (cons (car result) (list (cons (car L) (cadr result))) )) otherwise.
+
+(define (split x L)
+  (helper L x '(() ())))
+
+(define (helper L x result)
+  (cond
+    ((null? L) result)
+    ((<= (car L) x)
+     (helper (cdr L) x (cons (append (car result) (cons (car L) '())) (cdr result)))
+     )
+    (else
+     (helper (cdr L) x (cons (car result) (list (cons (car L) (cadr result))) ))
+     )
+    )
+  )
+
+
+;;8th question
+
+;;(psort L) returns sorted version of the list L
+;; Base Case : if the list is empty return empty list and if the list has only one element then return the single element.
+;; Hypothesis : (merge (psort (car (split (car l) l))) (psort (cadr (split (car l) l )))) returns the merged version of two sorted arrays to form another result sorted array.
+;; Recursive Step : (psort L) gives (merge (psort (car (split (car l) l))) (psort (cadr (split (car l) l ))))
+
+;;(merge l1 l2) returns merged sorted version of l1 and l2
+;; Base Case : if any of the lists are empty, return the other list.
+;; Hypotheses : (merge (cdr l1) l2) returns merged version l1 and l2 with l1 not having the first element. (merge (cdr l2) l1)) returns merged version l1 and l2 with l2 not having the first element.
+;; Recursive Step : (merge l1 l2) gives either (merge (cdr l1) l2)) or (merge (cdr l2) l1)).
+
+(define (spliting x L)
+  (helper L x '(() ())))
+
+(define (help L x result)
+  (cond
+    ((null? L) result)
+    ((< (car L) x)
+     (help (cdr L) x (cons (append (car result) (cons (car L) '())) (cdr result)))
+     )
+    (else
+     (help (cdr L) x (cons (car result) (list (cons (car L) (cadr result))) ))
+     )
+    )
+  )
+
+(define (merge l1 l2)
+    (cond
+      ((null? l1) l2)
+      ((null? l2) l1)
+      ((< (car l1) (car l2)) (cons (car l1) (merge (cdr l1) l2)))
+      (else (cons (car l2) (merge (cdr l2) l1)))
+      )
+    )
+(define (psort l)
+    (cond
+      ((null? l) '())
+      ((null? (cdr l)) l)
+      (else
+       (merge (psort (car (spliting (car l) l)))
+              (psort (cadr (spliting (car l) l ))))
+       )
+      )
+    )
+
+;; 9th question
+(define (applyToList f)
+    (lambda (L) (map f L)))
